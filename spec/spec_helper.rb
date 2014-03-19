@@ -1,5 +1,6 @@
 require 'line'
 require 'station'
+require 'transit'
 require 'rspec'
 require 'pg'
 

@@ -21,7 +21,7 @@ describe Station do
     new_line.save
     new_station = Station.new({'name' => 'Panda'})
     new_station.save
-    test_result = new_station.create_stop(new_line.id)
+    test_result = Station.create_stop(new_line.id, new_station.id)
     test_result.should be_an_instance_of Fixnum
   end
 
@@ -39,8 +39,8 @@ describe Station do
     new_line = Line.new({'name' => 'Trans-Siberian'})
     new_station.save
     new_line.save
-    new_station.create_stop(new_line.id)
-    new_station.remove_stop(new_line.id)
+    Station.create_stop(new_line.id, new_station.id)
+    Station.remove_stop(new_line.id, new_station.id)
     test_result = DB.exec("SELECT count(id) num_records FROM stops WHERE station_id = #{new_station.id} and line_id = #{new_line.id};")
     test_result.first['num_records'].to_i.should eq 0
   end
@@ -62,7 +62,7 @@ describe Station do
     new_line = Line.new({'name' => 'Trans-Siberian'})
     new_station.save
     new_line.save
-    new_station.create_stop(new_line.id)
+    Station.create_stop(new_line.id, new_station.id)
     new_station.all_lines.should eq [new_line]
   end
 

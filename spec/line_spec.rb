@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Line do
-  it  'initializes a new line object with a name' do
+  it 'initializes a new line object with a name' do
     new_line = Line.new({'name' => 'Trans-Siberian'})
     new_line.should be_an_instance_of Line
   end
@@ -21,7 +21,7 @@ describe Line do
     new_line.save
     new_station = Station.new({'name' => 'Panda'})
     new_station.save
-    test_result = new_line.create_stop(new_station.id)
+    test_result = Line.create_stop(new_line.id, new_station.id)
     test_result.should be_an_instance_of Fixnum
   end
 
@@ -40,8 +40,8 @@ describe Line do
     new_line = Line.new({'name' => 'Trans-Siberian'})
     new_station.save
     new_line.save
-    new_line.create_stop(new_station.id)
-    new_line.remove_stop(new_station.id)
+    Line.create_stop(new_line.id, new_station.id)
+    Line.remove_stop(new_line.id, new_station.id)
     test_result = DB.exec("SELECT count(id) num_records FROM stops WHERE station_id = #{new_station.id} and line_id = #{new_line.id};")
     test_result.first['num_records'].to_i.should eq 0
   end
@@ -63,7 +63,7 @@ describe Line do
     new_line = Line.new({'name' => 'Trans-Siberian'})
     new_station.save
     new_line.save
-    new_line.create_stop(new_station.id)
+    Line.create_stop(new_line.id, new_station.id)
     new_line.all_stations.should eq [new_station]
   end
 
