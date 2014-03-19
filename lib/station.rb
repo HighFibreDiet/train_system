@@ -71,4 +71,8 @@ class Station
     @name = new_name
     DB.exec("UPDATE station SET name = '#{new_name}' WHERE id = #{self.id};")
   end
+
+  def self.global_stops
+    results = DB.exec("SELECT b.name line_name, c.name station_name, a.id stop_id FROM stops a INNER JOIN line b ON a.line_id = b.id INNER JOIN station c ON a.station_id = c.id;")
+  end
 end

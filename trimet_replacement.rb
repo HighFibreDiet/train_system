@@ -30,7 +30,44 @@ def header
 end
 
 def main_menu
+  system('clear')
+  header
+  puts "Press 'vl' to view all lines in the system"
+  puts "Press 'vs' to view all stations in the system"
+  puts "Press 'l' to choose a line and view its stations"
+  puts "Press 's' to choose a station and view all its lines"
+  puts "Press 'm' to go back to the starting menu"
+  puts "Press 'x' to exit"
 
+  user_choice = gets.chomp
+
+  case user_choice
+  when 'vl'
+    list_lines
+    gets
+    main_menu
+  when 'vs'
+    list_stations
+    gets
+    main_menu
+  when 'l'
+    line_stations
+    gets
+    main_menu
+  when 's'
+    station_lines
+    gets
+    main_menu
+  when 'm'
+    starting_menu
+  when 'x'
+    puts "Goodbye!"
+    exit
+  else
+    idiot_menu
+    gets
+    main_menu
+  end
 end
 
 def operator_menu
@@ -38,10 +75,11 @@ def operator_menu
   puts "\n****** Operator Menu ******\n"
   puts "Press 'nl' to add a new line"
   puts "Press 'ns' to add a new station"
+  puts "Press 'nc' to add a stop routing a line through a station"
   puts "Press 'vs' to view all stations"
   puts "Press 'vl' to view all lines"
+  puts "Press 'vc' to view all stops"
   puts "Press 'u' to update a station, line, or stop"
-  puts "Press 'c' to connect a line and station with a new stop"
   puts "Press 's' to return to the starting menu"
 
   user_choice = gets.chomp
@@ -59,15 +97,61 @@ def operator_menu
     list_lines
     gets
     operator_menu
+  when 'vc'
+    list_stops
+    gets
+    operator_menu
   when 'u'
     update_menu
-  when 'c'
-    new_stop
+  when 'nc'
+    add_stop
   when 's'
     starting_menu
   else
     idiot_menu
     operator_menu
+  end
+end
+
+def line_stations
+  puts "Enter the name of the line you would like to view, or 'l' to list all lines."
+  view_choice = gets.chomp
+  if view_choice == 'l'
+    list_lines
+    puts "Enter the name of the line you would like to view."
+    view_choice = gets.chomp
+  end
+  line = Line.search(view_choice)
+  while line.nil?
+    puts "That is not a valid line name. Please enter a valid line name choice."
+    view_choice = gets.chomp
+    line = Line.search(view_choice)
+  end
+  all_stations = line.all_stations
+  puts "The #{line.name} line goes through the following stations:"
+  all_stations.each do |station|
+    puts "#{station.name} station"
+  end
+end
+
+def station_lines
+  puts "Enter the name of the station you would like to view, or 'l' to list all stations."
+  view_choice = gets.chomp
+  if view_choice == 'l'
+    list_stations
+    puts "Enter the name of the station you would like to view."
+    view_choice = gets.chomp
+  end
+  station = Station.search(view_choice)
+  while station.nil?
+    puts "That is not a valid station name. Please enter a valid station name choice."
+    view_choice = gets.chomp
+    station = Station.search(view_choice)
+  end
+  all_lines = station.all_lines
+  puts "The #{station.name} station is on the following lines:"
+  all_lines.each do |line|
+    puts "#{line.name} line"
   end
 end
 
@@ -97,7 +181,7 @@ def new_station
 end
 
 def update_menu
-  puts "Enter 's' to update a station, 'l' to update a line."
+  puts "Enter 's' to update a station, 'l' to update a line, or 'c' to update a stop connecting a line through a station."
   puts "You can update a stop from any station or line that includes that stop."
   what_to_update = gets.chomp
   case what_to_update
@@ -105,14 +189,30 @@ def update_menu
     update_station
   when 'l'
     update_line
+  when 'c'
+    update_stop
   else
     idiot_menu
     update_menu
   end
 end
 
+def update_stop
+  puts "Stops have no names. Enter 'd' to delete an existing stop, or 'm' to return to the operator menu."
+  stop_menu_choice = gets.chomp
+  case stop_menu_choice
+  when 'd'
+    remove_stop
+  when 'm'
+    operator_menu
+  else
+    idiot_menu
+    update_stop
+  end
+end
+
 def update_station
-  puts "Enter 'r' to rename a station, 's' to remove a line, or 'd' to delete the station."
+  puts "Enter 'r' to rename a station, or 'd' to delete the station."
   station_update_choice = gets.chomp
   case station_update_choice
   when 'r'
@@ -133,7 +233,6 @@ def update_station
     new_name = gets.chomp
     station.update_name(new_name)
     operator_menu
-  when 's'
   when 'd'
     puts "Enter the name of the station you would like to remove, or 'l' to list all stations."
     removal_choice = gets.chomp
@@ -174,7 +273,7 @@ def list_lines
 end
 
 def update_line
-  puts "Enter 'r' to rename a line, 's' to remove a station, or 'd' to delete the line."
+  puts "Enter 'r' to rename a line, or 'd' to delete the line."
   line_update_choice = gets.chomp
   case line_update_choice
   when 'r'
@@ -195,7 +294,6 @@ def update_line
     new_name = gets.chomp
     line.update_name(new_name)
     operator_menu
-  when 's'
   when 'd'
     puts "Enter the name of the line you would like to remove, or 'l' to list all lines."
     removal_choice = gets.chomp
@@ -218,11 +316,89 @@ def update_line
     update_line
   end
 end
-def new_stop
 
+def add_stop
+  station_choice = ''
+  list_choice = ''
+  puts "Enter the name of the station you wish to add a stop at, or 'l' to list the stations."
+  station_choice = gets.chomp
+  if station_choice == 'l'
+    list_stations
+    puts "Enter the name of the station you wish to add a stop at."
+    station_choice = gets.chomp
+  end
+  station = Station.search(station_choice)
+  while station.nil? do
+    puts "Please enter a valid station name."
+    station_choice = gets.chomp
+    station = Station.search(station_choice)
+  end
+  puts "Enter the name of the line you wish to route through #{station_choice}, or 'l' to list the lines."
+  line_choice = gets.chomp
+  if line_choice == 'l'
+    list_lines
+    puts "Enter the name of the line you wish to route through #{station_choice}:"
+    line_choice = gets.chomp
+  end
+  line = Line.search(line_choice)
+  while line.nil? do
+    puts "Please enter a valid line name."
+    line_choice = gets.chomp
+    line = Line.search(line_choice)
+  end
+  if station.all_lines.include?(line)
+    puts "The #{line.name} line is already routed through the #{station.name} station."
+  else
+    stop_id = station.create_stop(line.id)
+    puts "A stop with id number #{stop_id} has been created for the #{line.name} line at the #{station.name} station."
+  end
+  gets
+  operator_menu
+end
+
+def remove_stop
+  puts "Enter the name of the station you wish to remove a stop from, or 'l' to list the stations."
+  station_choice = gets.chomp
+  if station_choice == 'l'
+    list_stations
+    puts "Enter the name of the station you wish to remove a stop from."
+    station_choice = gets.chomp
+  end
+  station = Station.search(station_choice)
+  while station.nil? do
+    puts "Please enter a valid station name."
+    station_choice = gets.chomp
+    station = Station.search(station_choice)
+  end
+  puts "Enter the name of the line you wish to no longer route through #{station_choice}, or 'l' to list the lines."
+  line_choice = gets.chomp
+  if line_choice == 'l'
+    list_lines
+    puts "Enter the name of the line you wish to no longer route through #{station_choice}:"
+    line_choice = gets.chomp
+  end
+  line = Line.search(line_choice)
+  while line.nil? do
+    puts "Please enter a valid line name."
+    line_choice = gets.chomp
+    line = Line.search(line_choice)
+  end
+  stop_id = line.remove_stop(station.id)
+  puts "Stop id number #{stop_id} has been deleted. The #{line.id} line no longer goes through the #{station.id} station."
+  gets
+  operator_menu
+end
+
+def list_stops
+  puts "\nThe current stops are:\n"
+  all_stops = Station.global_stops
+  all_stops.each do |stop|
+    puts "Stop ID #{stop['stop_id']} routes #{stop['line_name']} line through #{stop['station_name']} station."
+  end
 end
 
 def idiot_menu
+  system('clear')
   puts "You are an idiot. You deserve punishment, but because we're nice people, we'll let you pick:\n"
   puts "Press 'k' to get kicked"
   puts "Press 'c' for chinese water torture (it's not that bad...we promise)"

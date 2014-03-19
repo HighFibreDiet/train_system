@@ -34,7 +34,8 @@ class Line
   end
 
   def remove_stop(station_id)
-    DB.exec("DELETE FROM stops WHERE line_id = #{self.id} and station_id = #{station_id};")
+    results = DB.exec("DELETE FROM stops WHERE line_id = #{self.id} and station_id = #{station_id} RETURNING id;")
+    stop_id = results.first['id'].to_i
   end
 
   def self.search(name)
