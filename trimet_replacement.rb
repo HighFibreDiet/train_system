@@ -1,5 +1,6 @@
-require './lib/line'
-require './lib/station'
+# require './lib/line'
+# require './lib/station'
+require './lib/transit'
 require 'pg'
 
 DB = PG.connect(:dbname => 'train_system')
@@ -349,7 +350,7 @@ def add_stop
   if station.all_lines.include?(line)
     puts "The #{line.name} line is already routed through the #{station.name} station."
   else
-    stop_id = station.create_stop(line.id)
+    stop_id = Station.create_stop(line.id, station.id)
     puts "A stop with id number #{stop_id} has been created for the #{line.name} line at the #{station.name} station."
   end
   gets
@@ -383,8 +384,8 @@ def remove_stop
     line_choice = gets.chomp
     line = Line.search(line_choice)
   end
-  stop_id = line.remove_stop(station.id)
-  puts "Stop id number #{stop_id} has been deleted. The #{line.id} line no longer goes through the #{station.id} station."
+  stop_id = Line.remove_stop(line.id, station.id)
+  puts "Stop id number #{stop_id} has been deleted. The #{line.name} line no longer goes through the #{station.name} station."
   gets
   operator_menu
 end
