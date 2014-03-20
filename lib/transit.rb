@@ -1,3 +1,5 @@
+require 'Date'
+
 class Transit
   attr_reader :name, :id
 
@@ -83,6 +85,10 @@ class Line < Transit
     stations
   end
 
+   def arrivals(time = Time.now.strftime("%I:%M:%S"), run_id)
+    results = DB.exec("SELECT b.name line_name, c.run_id run_number, c.arrival_time, d.name station_name FROM stops a INNER JOIN line b ON a.line_id = b.id INNER JOIN arrivals c ON a.id = c.stop_id INNER JOIN station d ON a.station_id = d.id WHERE d.name = '#{self.name}' AND arrival_time > time AND c.run_id = #{run_id};")
+  end
+
 end
 
 class Station < Transit
@@ -96,6 +102,10 @@ class Station < Transit
       lines << Line.new(result)
     end
     lines
+  end
+
+  def arrivals(time = Time.now.strftime("%I:%M:%S"))
+    results = DB.exec("SELECT b.name line_name, c.run_id run_number, c.arrival_time, d.name station_name FROM stops a INNER JOIN line b ON a.line_id = b.id INNER JOIN arrivals c ON a.id = c.stop_id INNER JOIN station d ON a.station_id = d.id WHERE d.name = '#{self.name}' AND arrival_time > time;")
   end
 end
 

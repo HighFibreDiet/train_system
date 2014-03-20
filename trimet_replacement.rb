@@ -1,6 +1,7 @@
 # require './lib/line'
 # require './lib/station'
 require './lib/transit'
+require './lib/arrival'
 require 'pg'
 
 DB = PG.connect(:dbname => 'train_system')
@@ -77,6 +78,7 @@ def operator_menu
   puts "Press 'nl' to add a new line"
   puts "Press 'ns' to add a new station"
   puts "Press 'nc' to add a stop routing a line through a station"
+  puts "Press 'na' to add a specific arrival for a stop"
   puts "Press 'vs' to view all stations"
   puts "Press 'vl' to view all lines"
   puts "Press 'vc' to view all stops"
@@ -90,6 +92,8 @@ def operator_menu
     new_line
   when 'ns'
     new_station
+  when 'na'
+    new_arrival
   when 'vs'
     list_stations
     gets
@@ -355,6 +359,22 @@ def add_stop
   end
   gets
   operator_menu
+end
+
+def new_arrival
+  puts "Enter the id number of the stop you would like to enter an arrival for, or 'l' to list the stops."
+  n_a_choice = gets.chomp
+  if n_a_choice = 'l'
+    list_stops
+    puts "Enter the id number of the stop you would like to enter an arrival for."
+    n_a_choice = gets.chomp
+  end
+  puts "Enter the arrival time for this stop arrival, in the format HH:MM:SS"
+  arrival_time = gets.chomp
+  puts "Enter the run number for the line."
+  run_number = gets.chomp
+  new_arrival = Arrival.new(n_a_choice, arrival_time, run_number)
+  new_arrival.save
 end
 
 def remove_stop

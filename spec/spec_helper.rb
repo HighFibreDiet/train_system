@@ -1,6 +1,7 @@
 require 'line'
 require 'station'
 require 'transit'
+require 'arrival'
 require 'rspec'
 require 'pg'
 
@@ -11,5 +12,6 @@ RSpec.configure do |config|
     DB.exec("DELETE FROM line *;")
     DB.exec("DELETE FROM station *;")
     DB.exec("DELETE FROM stops *;")
+    DB.exec("DELETE FROM arrivals *;")
   end
 end
